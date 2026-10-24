@@ -6,3 +6,7 @@ venv/
 .pytest_cache/
 .DS_Store
 *.log
+
+# Secrets — never push to public repo
+.env
+*.env
