@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Duel — 1v1 Real-Time Tactical Guessing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand"><span class="brand-icon">⚔️</span><h1 class="brand-title">NUMBER DUEL</h1></div>
+      <div id="connectionStatus" class="badge badge-online"><span class="dot"></span> Connected</div>
+    </header>
+
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <main class="main-content">
+      <!-- LOBBY SCREEN -->
+      <section id="lobbyScreen" class="screen-card active">
+        <div class="hero-section">
+          <div class="tagline-pill">1v1 Real-Time Duel</div>
+          <h2>Outsmart Your Opponent</h2>
+          <p class="subtitle">Pick a secret number 1–100. Alternate guessing with truthful hints to win.</p>
+        </div>
+        <div class="lobby-form">
+          <div class="input-group">
+            <label for="playerNameInput">Nickname</label>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="15" value="Player">
+          </div>
+          <div class="actions-grid">
+            <div class="action-box">
+              <h3>Create Room</h3>
+              <p>Start a new match and invite a challenger.</p>
+              <button id="createRoomBtn" class="btn btn-primary btn-glow"><span>⚔️ Create Room</span></button>
+            </div>
+            <div class="divider-text">OR</div>
+            <div class="action-box">
+              <h3>Join Room</h3>
+              <p>Enter 4-character code to duel.</p>
+              <div class="join-row">
+                <input type="text" id="roomCodeInput" class="code-input" placeholder="CODE" maxlength="4">
+                <button id="joinRoomBtn" class="btn btn-secondary">Join</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WAITING SCREEN -->
+      <section id="waitingScreen" class="screen-card">
+        <div class="screen-header">
+          <div class="status-pill pulse">Waiting for Opponent</div>
+          <h2>Room Created</h2>
+          <p>Share code or link with your opponent.</p>
+        </div>
+        <div class="invite-panel">
+          <div class="code-showcase"><span class="label">ROOM CODE</span><div class="room-code-display" id="displayRoomCode">----</div></div>
+          <div class="invite-link-row">
+            <input type="text" id="inviteLinkInput" readonly>
+            <button id="copyInviteBtn" class="btn btn-copy"><span id="copyBtnText">📋 Copy Link</span></button>
+          </div>
+        </div>
+        <div class="roster-grid">
+          <div class="roster-card confirmed" id="p1RosterCard">
+            <div class="roster-avatar">👑</div>
+            <div class="roster-info"><span class="player-slot">Host</span><strong id="p1NameDisplay">Alice</strong></div>
+            <span class="roster-status ready">Ready</span>
+          </div>
+          <div class="roster-card waiting" id="p2RosterCard">
+            <div class="roster-avatar">⏳</div>
+            <div class="roster-info"><span class="player-slot">Challenger</span><strong id="p2NameDisplay">Waiting...</strong></div>
+            <span class="roster-status pending">Waiting</span>
+          </div>
+        </div>
+        <div class="screen-footer"><button id="leaveRoomBtn" class="btn btn-ghost">← Leave</button></div>
+      </section>
+
+      <!-- CHOOSING SCREEN -->
+      <section id="choosingScreen" class="screen-card">
+        <div class="screen-header">
+          <div class="status-pill">Setup</div>
+          <h2>Pick Your Secret Number</h2>
+          <p>Select an integer between <strong>1 and 100</strong>.</p>
+        </div>
+        <div class="choosing-box">
+          <div id="numberSelectArea">
+            <div class="number-input-wrap">
+              <input type="number" id="secretNumberInput" min="1" max="100" placeholder="1–100">
+              <button id="confirmSecretBtn" class="btn btn-primary">Lock In 🔒</button>
+            </div>
+            <div class="quick-pick"><span>Randomize:</span><button id="quickRandomBtn" class="btn-chip">🎲 Random</button></div>
+          </div>
+          <div id="numberChosenConfirmed" class="confirmed-secret-box hidden">
+            <div class="check-icon">✅</div>
+            <div><h3>Number Locked!</h3><p>Your Secret: <strong class="my-number-badge" id="confirmedSecretBadge">--</strong></p></div>
+          </div>
+        </div>
+        <div class="matchup-status">
+          <div class="player-ready-pill" id="p1StatusPill"><span class="indicator"></span><span id="chooseP1Name">P1</span>: <span id="chooseP1State">Picking...</span></div>
+          <div class="vs-badge">VS</div>
+          <div class="player-ready-pill" id="p2StatusPill"><span class="indicator"></span><span id="chooseP2Name">P2</span>: <span id="chooseP2State">Picking...</span></div>
+        </div>
+      </section>
+
+      <!-- PLAYING SCREEN -->
+      <section id="playingScreen" class="screen-card">
+        <div class="match-info-bar">
+          <div class="match-player-badge"><span class="role-tag">YOU</span><strong id="myDisplayName">P1</strong><span class="secret-tag">Secret: <span id="mySecretNumber">--</span></span></div>
+          <div class="room-pill-small">Room: <strong id="inGameRoomCode">----</strong></div>
+          <div class="match-player-badge opponent"><span class="role-tag">OPPONENT</span><strong id="opponentDisplayName">P2</strong><span class="secret-tag">Secret: 🔒</span></div>
+        </div>
+
+        <div id="turnBanner" class="turn-banner">
+          <div class="turn-icon" id="turnIcon">🎯</div>
+          <div class="turn-text-group"><h3 id="turnMainText">Your Turn!</h3><p id="turnSubText">Guess an integer 1–100.</p></div>
+        </div>
+
+        <div class="action-interactive-area">
+          <div id="guessBox" class="play-action-card">
+            <h4>Make Guess</h4>
+            <div class="guess-form-row">
+              <input type="number" id="guessInput" min="1" max="100" placeholder="1–100">
+              <button id="submitGuessBtn" class="btn btn-primary btn-glow">Submit 🎯</button>
+            </div>
+            <p class="hint-tip">Narrow down with binary search technique!</p>
+          </div>
+
+          <div id="provideHintBox" class="play-action-card hint-action-card hidden">
+            <div class="hint-alert-header"><span class="badge-alert">ACTION REQUIRED</span><h4>Opponent Guessed <span id="opponentGuessValue" class="highlight-val">--</span></h4></div>
+            <p>Your secret is <strong id="hintDefendSecret">--</strong>. Provide truthful hint:</p>
+            <div class="hint-buttons-row">
+              <button id="hintHigherBtn" class="btn btn-higher"><span>⬆️ HIGHER</span><small>Your number &gt; <span class="opp-guess-ref">--</span></small></button>
+              <button id="hintLowerBtn" class="btn btn-lower"><span>⬇️ LOWER</span><small>Your number &lt; <span class="opp-guess-ref">--</span></small></button>
+            </div>
+          </div>
+
+          <div id="waitingForHintBox" class="play-action-card waiting-card hidden">
+            <div class="spinner-small"></div>
+            <h4>Waiting for Hint...</h4>
+            <p>You guessed <strong id="myLastGuessWaiting">--</strong>. Opponent is checking...</p>
+          </div>
+        </div>
+
+        <div class="duel-log-container">
+          <div class="duel-log-header"><h4>Duel Log</h4><span class="log-count" id="logRoundCount">0 rounds</span></div>
+          <div id="duelLogStream" class="duel-log-stream"><div class="log-empty">No guesses yet.</div></div>
+        </div>
+      </section>
+
+      <!-- FINISHED SCREEN -->
+      <section id="finishedScreen" class="screen-card">
+        <div class="victory-card">
+          <div class="victory-trophy" id="victoryIcon">🏆</div>
+          <h2 id="victoryTitle">Game Over</h2>
+          <p id="victorySubtitle" class="victory-desc">Match complete.</p>
+          <div class="revealed-secrets-grid">
+            <div class="revealed-box"><span class="player-tag" id="revealP1Name">P1</span><span class="revealed-num" id="revealP1Secret">--</span><span class="secret-label">Secret Number</span></div>
+            <div class="revealed-box"><span class="player-tag" id="revealP2Name">P2</span><span class="revealed-num" id="revealP2Secret">--</span><span class="secret-label">Secret Number</span></div>
+          </div>
+          <div class="stats-summary">Rounds: <strong id="finalRoundsCount">0</strong></div>
+          <button id="playAgainBtn" class="btn btn-primary btn-glow">Return to Lobby</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
