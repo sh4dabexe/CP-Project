@@ -17,7 +17,10 @@ load_dotenv(os.path.join(base_dir, "..", "..", "number-duel-spec-files", ".env")
 frontend_dir = os.path.abspath(os.path.join(base_dir, "..", "frontend"))
 app = Flask(__name__, static_folder=frontend_dir, static_url_path="")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(24))
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+
+# Use gevent in production (gunicorn), threading for local dev
+_async_mode = "gevent" if os.getenv("SERVER_SOFTWARE", "").startswith("gunicorn") else "threading"
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode=_async_mode)
 gm = GameManager()
 
 @app.route("/")
