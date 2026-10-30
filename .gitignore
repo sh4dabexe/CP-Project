@@ -10,3 +10,10 @@ venv/
 # Secrets — never push to public repo
 .env
 *.env
+
+# Deployment configurations
+/Procfile
+/render.yaml
+/requirements.txt
+/frontend/vercel.json
+
