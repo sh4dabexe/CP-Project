@@ -6,7 +6,15 @@
   const state = { roomCode: null, playerToken: null, playerNumber: null, playerName: 'Player', mySecretNumber: null, currentRoomState: null };
   const $ = (id) => document.getElementById(id);
   const screens = { lobby: $('lobbyScreen'), waiting: $('waitingScreen'), choosing: $('choosingScreen'), playing: $('playingScreen'), finished: $('finishedScreen') };
-  const socket = io({ reconnection: true, reconnectionAttempts: 10 });
+  // 🔧 DEPLOYMENT CONFIG:
+  // On localhost → connects to http://localhost:5000
+  // On Vercel (production) → set your Render URL below
+  const RENDER_URL = 'YOUR_RENDER_URL_HERE'; // e.g. 'https://number-duel-xxxx.onrender.com'
+  const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? '' // empty string = same origin (local dev)
+    : RENDER_URL;
+  const socket = io(BACKEND_URL, { reconnection: true, reconnectionAttempts: 10 });
+
 
   function showScreen(name) {
     Object.keys(screens).forEach((k) => screens[k].classList.toggle('active', k === name));

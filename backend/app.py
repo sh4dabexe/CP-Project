@@ -1,4 +1,8 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os, secrets
+
 from flask import Flask, send_from_directory, jsonify, request
 from flask_socketio import SocketIO, emit, join_room as sock_join
 from dotenv import load_dotenv
@@ -18,9 +22,7 @@ frontend_dir = os.path.abspath(os.path.join(base_dir, "..", "frontend"))
 app = Flask(__name__, static_folder=frontend_dir, static_url_path="")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(24))
 
-# Use gevent in production (gunicorn), threading for local dev
-_async_mode = "gevent" if os.getenv("SERVER_SOFTWARE", "").startswith("gunicorn") else "threading"
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode=_async_mode)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 gm = GameManager()
 
 @app.route("/")
