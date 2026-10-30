@@ -9,7 +9,7 @@
   // 🔧 DEPLOYMENT CONFIG:
   // On localhost → connects to http://localhost:5000
   // On Vercel (production) → set your Render URL below
-  const RENDER_URL = 'YOUR_RENDER_URL_HERE'; // e.g. 'https://number-duel-xxxx.onrender.com'
+  const RENDER_URL = 'https://cp-project-ieh4.onrender.com'; // e.g. 'https://number-duel-xxxx.onrender.com'
   const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? '' // empty string = same origin (local dev)
     : RENDER_URL;

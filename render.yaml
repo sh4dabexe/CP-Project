@@ -2,9 +2,8 @@ services:
   - type: web
     name: number-duel-backend
     runtime: python
-    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --worker-class eventlet -w 1 app:app
+    startCommand: gunicorn --worker-class eventlet -w 1 --chdir backend app:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
